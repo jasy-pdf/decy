@@ -1,6 +1,6 @@
 {
   "name": "decy",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Exact decimal math for money and quantities: locale-strict parsing, deliberate rounding, allocation without lost cents. Zero dependencies.",
   "keywords": [
     "allocation",
