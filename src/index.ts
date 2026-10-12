@@ -1,5 +1,6 @@
 export type { Decimal } from "./core/decimal.ts";
-export { MAX_SCALE } from "./core/decimal.ts";
+export { MAX_SCALE } from "./core/scale.ts";
+export type { RoundingMode } from "./core/roundingMode.ts";
 export { DecyError, type DecyErrorCode } from "./core/errors.ts";
 
 export { decimal } from "./convert/decimal.ts";
@@ -20,3 +21,6 @@ export { isZero } from "./compare/isZero.ts";
 export { isNegative } from "./compare/isNegative.ts";
 export { min } from "./compare/min.ts";
 export { max } from "./compare/max.ts";
+
+export { round, type RoundOptions } from "./rounding/round.ts";
+export { roundToStep } from "./rounding/roundToStep.ts";

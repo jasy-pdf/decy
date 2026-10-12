@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vite-plus/test";
-import { MAX_SCALE } from "../../src/core/decimal.ts";
+import { MAX_SCALE } from "../../src/core/scale.ts";
 import { errorCode } from "../helpers/errorCode.ts";
 import { decimal } from "../../src/convert/decimal.ts";
 

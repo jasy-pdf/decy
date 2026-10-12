@@ -1,4 +1,10 @@
-export type DecyErrorCode = "invalidDecimal" | "invalidNumber" | "invalidScale";
+export type DecyErrorCode =
+  | "invalidDecimal"
+  | "invalidNumber"
+  | "invalidScale"
+  | "invalidRoundingMode"
+  | "invalidStep"
+  | "divisionByZero";
 
 /** Thrown for programmer errors. User input never throws, it returns a result. */
 export class DecyError extends Error {
