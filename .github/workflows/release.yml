@@ -70,7 +70,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_REPOSITORY: ${{ github.repository }}
           TAG: ${{ github.ref_name }}
-          NAME: decy
+          NAME: "@jasy/decy"
           VERSION: ${{ steps.release.outputs.version }}
           DIST: ${{ steps.release.outputs.dist }}
         run: node scripts/gh-release.mjs
