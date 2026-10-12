@@ -6,3 +6,17 @@ export { decimal } from "./convert/decimal.ts";
 export { fromNumber } from "./convert/fromNumber.ts";
 export { fromBigInt } from "./convert/fromBigInt.ts";
 export { toDecimalString } from "./convert/toDecimalString.ts";
+
+export { add } from "./arithmetic/add.ts";
+export { subtract } from "./arithmetic/subtract.ts";
+export { multiply } from "./arithmetic/multiply.ts";
+export { negate } from "./arithmetic/negate.ts";
+export { abs } from "./arithmetic/abs.ts";
+export { sum } from "./arithmetic/sum.ts";
+
+export { compare, type Comparison } from "./compare/compare.ts";
+export { equals } from "./compare/equals.ts";
+export { isZero } from "./compare/isZero.ts";
+export { isNegative } from "./compare/isNegative.ts";
+export { min } from "./compare/min.ts";
+export { max } from "./compare/max.ts";
