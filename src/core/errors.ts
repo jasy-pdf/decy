@@ -5,7 +5,9 @@ export type DecyErrorCode =
   | "invalidRoundingMode"
   | "invalidStep"
   | "invalidRatios"
-  | "divisionByZero";
+  | "divisionByZero"
+  | "invalidIntlOptions"
+  | "unsupportedEnvironment";
 
 /** Thrown for programmer errors. User input never throws, it returns a result. */
 export class DecyError extends Error {

@@ -29,3 +29,9 @@ export { divide, type DivideOptions } from "./division/divide.ts";
 export { percentageOf } from "./division/percentageOf.ts";
 
 export { allocate, type AllocateOptions } from "./allocation/allocate.ts";
+
+export { localeSymbols, type LocaleSymbols } from "./locale/localeSymbols.ts";
+export type { InputOptions } from "./locale/inputOptions.ts";
+export { parse, type ParseError, type ParseResult } from "./locale/parse.ts";
+export { isValidPartialInput } from "./locale/isValidPartialInput.ts";
+export { format, type FormatOptions } from "./locale/format.ts";
