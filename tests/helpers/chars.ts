@@ -2,3 +2,4 @@
 export const NO_BREAK_SPACE = String.fromCodePoint(0xa0);
 export const NARROW_NO_BREAK_SPACE = String.fromCodePoint(0x202f);
 export const THIN_SPACE = String.fromCodePoint(0x2009);
+export const FIGURE_SPACE = String.fromCodePoint(0x2007);

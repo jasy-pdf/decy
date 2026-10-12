@@ -6,7 +6,12 @@ import { format } from "../../src/locale/format.ts";
 import { localeSymbols } from "../../src/locale/localeSymbols.ts";
 import { parse, type ParseResult } from "../../src/locale/parse.ts";
 import { anyDecimal, locales, runtimeLanguages } from "../helpers/arbitraries.ts";
-import { NARROW_NO_BREAK_SPACE, NO_BREAK_SPACE, THIN_SPACE } from "../helpers/chars.ts";
+import {
+  FIGURE_SPACE,
+  NARROW_NO_BREAK_SPACE,
+  NO_BREAK_SPACE,
+  THIN_SPACE,
+} from "../helpers/chars.ts";
 import { errorCode } from "../helpers/errorCode.ts";
 import { text } from "../helpers/text.ts";
 
@@ -70,6 +75,8 @@ describe("parse, allowGrouping: what paste and import get", () => {
     ["en-US", "1,234.5", "1234.5"],
     ["en-IN", "1,23,456.5", "123456.5"],
     ["de-CH", "12'345", "12345"],
+    // Groups of two: the grouping rule comes from Intl, not from a hard-coded three.
+    ["tok", "1 23 45 67,5", "1234567.5"],
     ["de-AT", `12 345,5`, "12345.5"],
   ])("%s reads %j as %s", (locale, input, result) => {
     expect(parsed(parse(input, locale, grouping))).toBe(result);
@@ -81,6 +88,7 @@ describe("parse, allowGrouping: what paste and import get", () => {
     ["no-break space", NO_BREAK_SPACE],
     ["plain space", " "],
     ["thin space", THIN_SPACE],
+    ["figure space (typesetting, PDF exports)", FIGURE_SPACE],
   ])("fr-FR groups with a %s", (_, space) => {
     expect(parsed(parse(`12${space}345`, "fr-FR", grouping))).toBe("12345");
   });

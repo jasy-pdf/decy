@@ -1,7 +1,10 @@
 import fc from "fast-check";
 import { createDecimal, type Decimal } from "../../src/core/decimal.ts";
 
-/** Each group separator family at least once: "." "," space, narrow space, apostrophe, RTL, Ewe (groups from 6 digits). */
+/**
+ * Each group separator family at least once: "." "," space, narrow space, apostrophe, RTL,
+ * Ewe (groups from 6 digits), Toki Pona (groups of two).
+ */
 export const locales = [
   "de-DE",
   "en-US",
@@ -15,6 +18,7 @@ export const locales = [
   "fa",
   "ur",
   "ee",
+  "tok",
 ] as const;
 
 /** Every two-letter language the runtime's Intl knows, for sweeps that must not miss an odd one. */
