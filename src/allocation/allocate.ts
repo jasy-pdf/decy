@@ -56,7 +56,8 @@ function toIntegerWeights(ratios: readonly Decimal[]): bigint[] {
   if (ratios.some((ratio) => ratio.units < 0n)) {
     throw new DecyError("invalidRatios", "Ratios must not be negative.");
   }
-  const scale = Math.max(...ratios.map((ratio) => ratio.scale));
+  // reduce, not Math.max(...spread): a spread of very many ratios overflows the call stack.
+  const scale = ratios.reduce((largest, ratio) => Math.max(largest, ratio.scale), 0);
   const weights = ratios.map((ratio) => ratio.units * 10n ** BigInt(scale - ratio.scale));
   if (weights.every((weight) => weight === 0n)) {
     throw new DecyError("invalidRatios", "At least one ratio must be greater than zero.");

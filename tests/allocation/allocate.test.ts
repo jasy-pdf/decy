@@ -71,6 +71,19 @@ describe("allocate", () => {
     expect(errorCode(() => allocate(d("1"), ratios, { scale: 0 }))).toBe("invalidRatios");
   });
 
+  test("handles very many parts without a stack overflow", () => {
+    const parts = allocate(
+      d("1.00"),
+      Array.from({ length: 200_000 }, () => d("1")),
+      { scale: 2 },
+    );
+    expect(parts).toHaveLength(200_000);
+    expect(parts.slice(0, 101).map((part) => part.units)).toEqual([
+      ...Array.from({ length: 100 }, () => 1n),
+      0n,
+    ]);
+  });
+
   // Laws, checked against random input: nothing lost, nothing invented, no part off by more than one unit.
   test("parts always sum to the total and stay within one unit of their exact share", () => {
     const ratioList = fc

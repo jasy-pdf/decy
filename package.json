@@ -48,5 +48,8 @@
     "typescript": "^7.0.2",
     "vite-plus": "catalog:"
   },
+  "engines": {
+    "node": ">=20"
+  },
   "packageManager": "pnpm@12.11.2"
 }

@@ -1,10 +1,12 @@
 import fc from "fast-check";
 import { describe, expect, test } from "vite-plus/test";
+import { decimal as d } from "../../src/convert/decimal.ts";
 import { MAX_SCALE } from "../../src/core/scale.ts";
 import { format } from "../../src/locale/format.ts";
 import { parse, type ParseResult } from "../../src/locale/parse.ts";
 import { anyDecimal, locales } from "../helpers/arbitraries.ts";
 import { NO_BREAK_SPACE } from "../helpers/chars.ts";
+import { errorCode } from "../helpers/errorCode.ts";
 import { text } from "../helpers/text.ts";
 
 function parsed(result: ParseResult): string {
@@ -16,6 +18,8 @@ describe("parse", () => {
     ["de-DE", "12,50", "12.50"],
     ["en-US", "12.50", "12.50"],
     ["de-DE", "1.234,5", "1234.5"],
+    ["de-DE", "1.234.567", "1234567"],
+    ["de-DE", "1.234,", "1234"],
     ["en-US", "1,234.5", "1234.5"],
     ["en-IN", "1,23,456.5", "123456.5"],
     ["de-DE", "-0,05", "-0.05"],
@@ -44,6 +48,11 @@ describe("parse", () => {
     ["de-DE", "12€", "invalidCharacter"],
     ["de-DE", "١٢", "invalidCharacter"],
     ["de-DE", "1,2,3", "multipleDecimalSeparators"],
+    // One grouping separator and no decimal part: 1.234 could be 1234 or 1,234 (numpad dot). Never guess.
+    ["de-DE", "1.234", "ambiguousGrouping"],
+    ["de-DE", "12.345", "ambiguousGrouping"],
+    ["en-US", "1,234", "ambiguousGrouping"],
+    ["en-IN", "12,345", "ambiguousGrouping"],
     ["de-DE", "", "empty"],
     ["de-DE", "   ", "empty"],
     ["de-DE", "-", "incomplete"],
@@ -68,14 +77,39 @@ describe("parse", () => {
     );
   });
 
-  test("reads back everything it formats, in every locale", () => {
+  test("reads back everything it formats without grouping, in every locale", () => {
     fc.assert(
       fc.property(anyDecimal, fc.constantFrom(...locales), (value, locale) => {
-        expect(parsed(parse(format(value, locale), locale))).toBe(text(value));
+        expect(parsed(parse(format(value, locale, { useGrouping: false }), locale))).toBe(
+          text(value),
+        );
       }),
-      { numRuns: 500 },
+      { numRuns: 1000 },
     );
   });
+
+  test("grouped output reads back exactly or is refused as ambiguous, never as another number", () => {
+    fc.assert(
+      fc.property(anyDecimal, fc.constantFrom(...locales), (value, locale) => {
+        const result = parsed(parse(format(value, locale), locale));
+        expect([text(value), "error: ambiguousGrouping"]).toContain(result);
+      }),
+      { numRuns: 1000 },
+    );
+  });
+
+  test("right-to-left locales: the invisible direction mark before the minus is ignored", () => {
+    for (const locale of ["ar", "he", "fa", "ur"]) {
+      expect(parsed(parse(format(d("-1234.5"), locale), locale))).toBe("-1234.5");
+    }
+  });
+
+  test.each([-1, 1.5, 31])(
+    "maxFractionDigits %s is a programmer error, not a user error",
+    (maxFractionDigits) => {
+      expect(errorCode(() => parse("1", "de-DE", { maxFractionDigits }))).toBe("invalidOptions");
+    },
+  );
 
   test("never throws, whatever the user types", () => {
     fc.assert(

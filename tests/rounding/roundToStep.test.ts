@@ -1,5 +1,6 @@
 import { describe, expect, test } from "vite-plus/test";
 import { decimal as d } from "../../src/convert/decimal.ts";
+import type { RoundingMode } from "../../src/core/roundingMode.ts";
 import { roundToStep } from "../../src/rounding/roundToStep.ts";
 import { errorCode } from "../helpers/errorCode.ts";
 import { text } from "../helpers/text.ts";
@@ -29,5 +30,10 @@ describe("roundToStep", () => {
 
   test.each(["0", "0.00", "-0.05"])("rejects step %s", (step) => {
     expect(errorCode(() => roundToStep(d("1"), d(step), "halfEven"))).toBe("invalidStep");
+  });
+
+  test("rejects an unknown mode even on an exact step", () => {
+    const mode = "halfUp" as RoundingMode;
+    expect(errorCode(() => roundToStep(d("1.25"), d("0.05"), mode))).toBe("invalidRoundingMode");
   });
 });

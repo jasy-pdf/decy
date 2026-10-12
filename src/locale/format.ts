@@ -3,9 +3,12 @@ import type { Decimal } from "../core/decimal.ts";
 import { DecyError } from "../core/errors.ts";
 import { numberFormat } from "./numberFormat.ts";
 
+/** "percent" is left out on purpose: it multiplies by 100. Use percentageOf for that. */
+export type FormatStyle = "decimal" | "currency" | "unit";
+
 /** The Intl options that do not touch the digits. Fraction digits always follow the value's scale. */
 export interface FormatOptions {
-  style?: "decimal" | "currency" | "unit";
+  style?: FormatStyle;
   currency?: string;
   currencyDisplay?: "symbol" | "narrowSymbol" | "code" | "name";
   unit?: string;
@@ -14,13 +17,32 @@ export interface FormatOptions {
   signDisplay?: "auto" | "always" | "exceptZero" | "negative" | "never";
 }
 
+// Records force every key and style of the types above to be listed.
+const ALLOWED_KEYS: Record<keyof FormatOptions, true> = {
+  style: true,
+  currency: true,
+  currencyDisplay: true,
+  unit: true,
+  unitDisplay: true,
+  useGrouping: true,
+  signDisplay: true,
+};
+const ALLOWED_STYLES: Record<FormatStyle, true> = { decimal: true, currency: true, unit: true };
+
 /**
  * Formats for display, e.g. format(1234.50, "de-DE", { style: "currency", currency: "EUR" }) = "1.234,50 €".
  * Never rounds: it shows exactly the digits of the value. Round first to get 2 digits for money.
  */
 export function format(value: Decimal, locale: string, options: FormatOptions = {}): string {
+  assertFormatOptions(options);
   const formatter = numberFormat(locale, {
-    ...options,
+    style: options.style,
+    currency: options.currency,
+    currencyDisplay: options.currencyDisplay,
+    unit: options.unit,
+    unitDisplay: options.unitDisplay,
+    useGrouping: options.useGrouping,
+    signDisplay: options.signDisplay,
     minimumFractionDigits: value.scale,
     maximumFractionDigits: value.scale,
   });
@@ -39,4 +61,18 @@ export function format(value: Decimal, locale: string, options: FormatOptions = 
     );
   }
   return parts.map((part) => part.value).join("");
+}
+
+/** JS callers can pass anything; whatever could change the digits must fail here, with the right reason. */
+function assertFormatOptions(options: FormatOptions): void {
+  const unknownKey = Object.keys(options).find((key) => !Object.hasOwn(ALLOWED_KEYS, key));
+  if (unknownKey !== undefined) {
+    throw new DecyError("invalidIntlOptions", `Unsupported format option: ${unknownKey}.`);
+  }
+  if (options.style !== undefined && !Object.hasOwn(ALLOWED_STYLES, options.style)) {
+    throw new DecyError(
+      "invalidIntlOptions",
+      `Unsupported format style: ${String(options.style)}.`,
+    );
+  }
 }

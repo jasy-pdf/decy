@@ -1,3 +1,5 @@
+import { DecyError } from "./errors.ts";
+
 /**
  * How to resolve digits that do not fit:
  * - halfAwayFromZero: commercial rounding (DIN 1333), 2.5 -> 3, -2.5 -> -3
@@ -14,3 +16,20 @@ export type RoundingMode =
   | "awayFromZero"
   | "floor"
   | "ceil";
+
+// Record forces every mode of the type to be listed here.
+const KNOWN_MODES: Record<RoundingMode, true> = {
+  halfAwayFromZero: true,
+  halfEven: true,
+  towardZero: true,
+  awayFromZero: true,
+  floor: true,
+  ceil: true,
+};
+
+/** Checked before any work, so an unknown mode (e.g. from a config) fails at once, not on the first odd value. */
+export function assertRoundingMode(mode: RoundingMode): void {
+  if (!Object.hasOwn(KNOWN_MODES, mode)) {
+    throw new DecyError("invalidRoundingMode", `Unknown rounding mode: ${String(mode)}.`);
+  }
+}

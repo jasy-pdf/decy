@@ -1,6 +1,6 @@
 import { createDecimal, type Decimal } from "../core/decimal.ts";
 import { divideRounded } from "../core/divideRounded.ts";
-import type { RoundingMode } from "../core/roundingMode.ts";
+import { assertRoundingMode, type RoundingMode } from "../core/roundingMode.ts";
 import { assertScale } from "../core/scale.ts";
 
 export interface DivideOptions {
@@ -12,6 +12,7 @@ export interface DivideOptions {
 /** a / b, rounded once to `scale`: divide(10, 3, { scale: 2, mode: "halfAwayFromZero" }) = 3.33. */
 export function divide(a: Decimal, b: Decimal, options: DivideOptions): Decimal {
   assertScale(options.scale);
+  assertRoundingMode(options.mode);
 
   // (a.units / 10^a.scale) / (b.units / 10^b.scale) * 10^scale, kept in integers until the single rounding step.
   const numerator = a.units * 10n ** BigInt(b.scale + options.scale);

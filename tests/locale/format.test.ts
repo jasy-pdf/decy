@@ -1,6 +1,6 @@
 import { describe, expect, test, vi } from "vite-plus/test";
 import { decimal as d } from "../../src/convert/decimal.ts";
-import { format } from "../../src/locale/format.ts";
+import { format, type FormatOptions } from "../../src/locale/format.ts";
 import { NO_BREAK_SPACE } from "../helpers/chars.ts";
 import { errorCode } from "../helpers/errorCode.ts";
 
@@ -36,6 +36,17 @@ describe("format", () => {
 
   test("grouping can be switched off", () => {
     expect(format(d("1234.5"), "de-DE", { useGrouping: false })).toBe("1234,5");
+  });
+
+  // JS callers can pass anything; options that would change digits or are unknown must fail with the right reason.
+  test.each([
+    ["percent multiplies by 100", { style: "percent" }],
+    ["digit options belong to the value's scale", { minimumIntegerDigits: 3 }],
+    ["rounding options belong to round()", { roundingMode: "ceil" }],
+  ])("refuses %s", (_, options) => {
+    expect(errorCode(() => format(d("1.5"), "de-DE", options as FormatOptions))).toBe(
+      "invalidIntlOptions",
+    );
   });
 
   test("bad Intl options fail with our error", () => {

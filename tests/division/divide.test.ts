@@ -1,5 +1,6 @@
 import { describe, expect, test } from "vite-plus/test";
 import { decimal as d } from "../../src/convert/decimal.ts";
+import type { RoundingMode } from "../../src/core/roundingMode.ts";
 import { divide } from "../../src/division/divide.ts";
 import { errorCode } from "../helpers/errorCode.ts";
 import { text } from "../helpers/text.ts";
@@ -39,5 +40,10 @@ describe("divide", () => {
     expect(errorCode(() => divide(d("1"), d("3"), { scale: 1.5, mode: "halfEven" }))).toBe(
       "invalidScale",
     );
+  });
+
+  test("rejects an unknown mode even when the division is exact", () => {
+    const mode = "halfUp" as RoundingMode;
+    expect(errorCode(() => divide(d("4"), d("2"), { scale: 0, mode }))).toBe("invalidRoundingMode");
   });
 });

@@ -43,8 +43,13 @@ describe("round", () => {
     expect(errorCode(() => round(d("1.25"), { scale, mode: "halfEven" }))).toBe("invalidScale");
   });
 
-  test("rejects an unknown mode", () => {
+  // Checked upfront: also when nothing needs rounding, so a bad mode from a config fails on day one.
+  test.each([
+    ["with a rest", "1.25", 1],
+    ["without a rest", "1.20", 1],
+    ["when only padding", "1.2", 2],
+  ])("rejects an unknown mode %s", (_, input, scale) => {
     const mode = "halfUp" as RoundingMode;
-    expect(errorCode(() => round(d("1.25"), { scale: 1, mode }))).toBe("invalidRoundingMode");
+    expect(errorCode(() => round(d(input), { scale, mode }))).toBe("invalidRoundingMode");
   });
 });

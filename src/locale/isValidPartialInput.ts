@@ -1,7 +1,7 @@
-import { MAX_SCALE } from "../core/scale.ts";
-import type { InputOptions } from "./inputOptions.ts";
+import { resolveInputOptions, type InputOptions } from "./inputOptions.ts";
 import { localeSymbols } from "./localeSymbols.ts";
 import { splitSign } from "./splitSign.ts";
+import { stripDirectionMarks } from "./stripDirectionMarks.ts";
 
 const DIGITS = /^\d*$/;
 
@@ -14,19 +14,22 @@ export function isValidPartialInput(
   locale: string,
   options: InputOptions = {},
 ): boolean {
-  const { maxFractionDigits = MAX_SCALE, allowNegative = true } = options;
+  const { maxFractionDigits, allowNegative } = resolveInputOptions(options);
   const symbols = localeSymbols(locale);
 
-  const { isNegative, rest } = splitSign(text, symbols);
+  const { isNegative, rest } = splitSign(stripDirectionMarks(text), symbols);
   if (isNegative && !allowNegative) return false;
 
   const sections = rest.split(symbols.decimal);
   if (sections.length > 2) return false;
   const [integerText = "", fractionText = ""] = sections;
 
+  // A decimal separator that can never be followed by a digit is not valid either.
+  if (sections.length === 2 && maxFractionDigits === 0) return false;
+
   return (
     DIGITS.test(integerText) &&
     DIGITS.test(fractionText) &&
-    fractionText.length <= Math.min(maxFractionDigits, MAX_SCALE)
+    fractionText.length <= maxFractionDigits
   );
 }
