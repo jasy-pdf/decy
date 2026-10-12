@@ -24,3 +24,6 @@ export { max } from "./compare/max.ts";
 
 export { round, type RoundOptions } from "./rounding/round.ts";
 export { roundToStep } from "./rounding/roundToStep.ts";
+
+export { divide, type DivideOptions } from "./division/divide.ts";
+export { percentageOf } from "./division/percentageOf.ts";
