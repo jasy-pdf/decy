@@ -24,6 +24,7 @@ decy does five things, and every calculation that touches money or quantities go
 - Small steps, talk before code. Discuss API changes before implementing them.
 - Tests come first for this library: it is pure logic, the tests are the specification. Cover edge cases explicitly (negative values, zero, huge values, every rounding boundary, every locale).
 - Run `vp check` and `vp test` before reporting a step as done.
+- Tests live in `tests/`, mirroring `src/` (`src/convert/decimal.ts` -> `tests/convert/decimal.test.ts`), never next to the source. Test helpers go to `tests/helpers/`.
 
 ## Code rules
 
