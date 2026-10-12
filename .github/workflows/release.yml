@@ -1,0 +1,76 @@
+name: Release
+
+# Triggered by the tag scripts/release.sh pushes (v1.0.0, v1.0.0-alpha.1).
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  release:
+    name: Publish to npm
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # create the GitHub Release
+      id-token: write # npm provenance
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # full history + tags so the changelog range resolves
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          registry-url: "https://registry.npmjs.org"
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Resolve version and npm dist-tag
+        id: release
+        run: |
+          VER="${GITHUB_REF_NAME#v}"
+          # The tag must match package.json, or we would publish a different version than tagged.
+          PKG=$(node -p "require('./package.json').version")
+          if [ "$VER" != "$PKG" ]; then
+            echo "Tag $GITHUB_REF_NAME does not match package.json version $PKG"
+            exit 1
+          fi
+          # A prerelease (1.0.0-alpha.1) goes to its channel (alpha), never to 'latest'.
+          DIST=$(printf '%s' "$VER" | sed -nE 's/^[0-9]+\.[0-9]+\.[0-9]+-([a-zA-Z]+).*/\1/p')
+          [ -z "$DIST" ] && DIST="latest"
+          { echo "version=$VER"; echo "dist=$DIST"; } >> "$GITHUB_OUTPUT"
+
+      # Never ship a red build.
+      - name: Check
+        run: pnpm exec vp check
+
+      - name: Test
+        run: pnpm exec vp test run
+
+      - name: Build
+        run: pnpm exec vp pack
+
+      - name: Publish
+        run: pnpm publish --access public --no-git-checks --tag "${{ steps.release.outputs.dist }}"
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_CONFIG_PROVENANCE: true
+
+      # Grouped changelog (changelogen) + contributor list, create-or-update (re-pushed tag = no duplicate).
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          TAG: ${{ github.ref_name }}
+          NAME: decy
+          VERSION: ${{ steps.release.outputs.version }}
+          DIST: ${{ steps.release.outputs.dist }}
+        run: node scripts/gh-release.mjs

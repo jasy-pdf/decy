@@ -117,7 +117,7 @@ Programmer errors throw a `DecyError` with a `code`, for example `invalidDecimal
 
 ## Requirements
 
-- Node 20 or newer, or a browser whose `Intl.NumberFormat` formats decimal strings exactly (all major engines since 2023).
+- Node 22 or newer, or a browser whose `Intl.NumberFormat` formats decimal strings exactly (all major engines since 2023).
 - On an older engine, `format` throws `unsupportedEnvironment` instead of showing a number that lost digits.
 - Every result has at most 30 digits after the decimal point (`MAX_SCALE`).
 

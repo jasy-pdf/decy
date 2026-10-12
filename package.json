@@ -41,17 +41,15 @@
     "test": "vp test",
     "check": "vp check",
     "prepublishOnly": "vp run build",
-    "prepare": "vp config",
-    "release": "bumpp"
+    "prepare": "vp config"
   },
   "devDependencies": {
-    "bumpp": "^11.1.0",
     "fast-check": "4.10.2",
     "typescript": "^7.0.2",
     "vite-plus": "catalog:"
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=22"
   },
   "packageManager": "pnpm@12.11.2"
 }
