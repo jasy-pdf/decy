@@ -1,3 +1,4 @@
+import { DecyError } from "../core/errors.ts";
 import { numberFormat } from "./numberFormat.ts";
 
 export interface LocaleSymbols {
@@ -5,6 +6,9 @@ export interface LocaleSymbols {
   group: string;
   minus: string;
 }
+
+// Seven integer digits: some languages (e.g. Ewe) only group from six digits on.
+const PROBE = -1234567.1;
 
 const cache = new Map<string, LocaleSymbols>();
 
@@ -16,12 +20,27 @@ export function localeSymbols(locale: string): LocaleSymbols {
   const cached = cache.get(locale);
   if (cached) return cached;
 
-  const parts = numberFormat(locale).formatToParts(-11111.1);
+  const parts = numberFormat(locale).formatToParts(PROBE);
   const symbols: LocaleSymbols = {
-    decimal: parts.find((part) => part.type === "decimal")!.value,
-    group: parts.find((part) => part.type === "group")!.value,
-    minus: parts.find((part) => part.type === "minusSign")!.value,
+    decimal: partValue(parts, "decimal", locale),
+    group: partValue(parts, "group", locale),
+    minus: partValue(parts, "minusSign", locale),
   };
   cache.set(locale, symbols);
   return symbols;
+}
+
+function partValue(
+  parts: Intl.NumberFormatPart[],
+  type: Intl.NumberFormatPartTypes,
+  locale: string,
+): string {
+  const part = parts.find((candidate) => candidate.type === type);
+  if (!part) {
+    throw new DecyError(
+      "unsupportedLocale",
+      `Intl gives no ${type} symbol for locale "${locale}".`,
+    );
+  }
+  return part.value;
 }

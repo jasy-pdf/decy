@@ -32,6 +32,6 @@ export { allocate, type AllocateOptions } from "./allocation/allocate.ts";
 
 export { localeSymbols, type LocaleSymbols } from "./locale/localeSymbols.ts";
 export type { InputOptions } from "./locale/inputOptions.ts";
-export { parse, type ParseError, type ParseResult } from "./locale/parse.ts";
+export { parse, type ParseError, type ParseOptions, type ParseResult } from "./locale/parse.ts";
 export { isValidPartialInput } from "./locale/isValidPartialInput.ts";
 export { format, type FormatOptions, type FormatStyle } from "./locale/format.ts";

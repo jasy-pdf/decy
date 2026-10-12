@@ -8,6 +8,7 @@ export type DecyErrorCode =
   | "divisionByZero"
   | "invalidIntlOptions"
   | "invalidOptions"
+  | "unsupportedLocale"
   | "unsupportedEnvironment";
 
 /** Thrown for programmer errors. User input never throws, it returns a result. */

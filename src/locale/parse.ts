@@ -1,14 +1,24 @@
 import { createDecimal, type Decimal } from "../core/decimal.ts";
 import { resolveInputOptions, type InputOptions } from "./inputOptions.ts";
 import { localeSymbols } from "./localeSymbols.ts";
+import { normalizeSpaces } from "./normalizeSpaces.ts";
 import { numberFormat } from "./numberFormat.ts";
 import { splitSign } from "./splitSign.ts";
 import { stripDirectionMarks } from "./stripDirectionMarks.ts";
+
+export interface ParseOptions extends InputOptions {
+  /**
+   * Accept grouping separators where Intl would put them, e.g. "1.234,50". For paste and import only.
+   * Defaults to false: in a form, "1.234.567" may be 1234,567 typed with the numpad dot. Only `true` enables it.
+   */
+  allowGrouping?: boolean;
+}
 
 export type ParseError =
   | "empty"
   | "incomplete"
   | "invalidCharacter"
+  | "groupingNotAllowed"
   | "invalidGrouping"
   | "ambiguousGrouping"
   | "multipleDecimalSeparators"
@@ -19,15 +29,19 @@ export type ParseResult = { ok: true; value: Decimal } | { ok: false; error: Par
 
 const DIGITS = /^\d*$/;
 
+// Only these can also be a decimal key, so only these make a single separator ambiguous.
+const CONFUSABLE_GROUPS = new Set([".", ","]);
+
 /**
  * Reads a complete user input in the given locale. Never throws for user input; errors are codes for i18n.
- * Grouping separators are accepted only where Intl itself would put them: "1.234,50" is fine in de-DE,
- * "12.50" is not (it is not 1250 and not 12.5, it is an error). A single grouping separator without a
- * decimal part ("1.234") is ambiguous: 1234, or 1,234 typed with the numpad dot. It is refused, never guessed.
+ * Grouping is refused unless allowGrouping is true. Then separators are accepted only where Intl itself
+ * would put them ("1.234,50" in de-DE, never "12.50"), and a single "." or "," without a decimal part
+ * ("1.234") is ambiguous: 1234, or 1,234 typed with the numpad dot. Refused, never guessed.
  * Surrounding whitespace and invisible direction marks are ignored.
  */
-export function parse(text: string, locale: string, options: InputOptions = {}): ParseResult {
+export function parse(text: string, locale: string, options: ParseOptions = {}): ParseResult {
   const { maxFractionDigits, allowNegative } = resolveInputOptions(options);
+  const allowGrouping = options.allowGrouping === true;
   const symbols = localeSymbols(locale);
 
   const input = stripDirectionMarks(text).trim();
@@ -36,7 +50,7 @@ export function parse(text: string, locale: string, options: InputOptions = {}):
   const { isNegative, rest } = splitSign(input, symbols);
   if (isNegative && !allowNegative) return failure("negativeNotAllowed");
 
-  const sections = rest.split(symbols.decimal);
+  const sections = normalizeSpaces(rest, symbols.group).split(symbols.decimal);
   if (sections.length > 2) return failure("multipleDecimalSeparators");
   const [integerText = "", fractionText = ""] = sections;
   const hasDecimalPart = sections.length === 2;
@@ -51,10 +65,18 @@ export function parse(text: string, locale: string, options: InputOptions = {}):
   if (integerDigits === "" && fractionText === "") {
     return failure("incomplete");
   }
+  if (isGrouped && !allowGrouping) {
+    return failure("groupingNotAllowed");
+  }
   if (isGrouped && integerText !== groupedLikeIntl(integerDigits, locale)) {
     return failure("invalidGrouping");
   }
-  if (isGrouped && integerGroups.length === 2 && !hasDecimalPart) {
+  if (
+    isGrouped &&
+    integerGroups.length === 2 &&
+    !hasDecimalPart &&
+    CONFUSABLE_GROUPS.has(symbols.group)
+  ) {
     return failure("ambiguousGrouping");
   }
   if (fractionText.length > maxFractionDigits) {
