@@ -1,16 +1,27 @@
 {
   "name": "decy",
   "version": "0.0.0",
-  "description": "A starter for creating a TypeScript package.",
-  "homepage": "https://github.com/author/library#readme",
+  "description": "Exact decimal math for money and quantities: locale-strict parsing, deliberate rounding, allocation without lost cents. Zero dependencies.",
+  "keywords": [
+    "allocation",
+    "bigint",
+    "currency",
+    "decimal",
+    "format",
+    "locale",
+    "money",
+    "parse",
+    "rounding"
+  ],
+  "homepage": "https://github.com/Flo0806/decy#readme",
   "bugs": {
-    "url": "https://github.com/author/library/issues"
+    "url": "https://github.com/Flo0806/decy/issues"
   },
   "license": "MIT",
-  "author": "Author Name <author.name@mail.com>",
+  "author": "Florian Heuberger",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/author/library.git"
+    "url": "git+https://github.com/Flo0806/decy.git"
   },
   "files": [
     "dist"
@@ -32,16 +43,9 @@
     "prepare": "vp config"
   },
   "devDependencies": {
-    "@types/node": "^26.1.1",
     "bumpp": "^11.1.0",
     "typescript": "^7.0.2",
-    "vite-plus": "^0.2.4"
+    "vite-plus": "catalog:"
   },
-  "packageManager": "pnpm@12.11.2",
-  "pnpm": {
-    "overrides": {
-      "vite": "npm:@voidzero-dev/vite-plus-core@latest",
-      "vitest": "npm:@voidzero-dev/vite-plus-test@latest"
-    }
-  }
+  "packageManager": "pnpm@12.11.2"
 }
