@@ -27,3 +27,5 @@ export { roundToStep } from "./rounding/roundToStep.ts";
 
 export { divide, type DivideOptions } from "./division/divide.ts";
 export { percentageOf } from "./division/percentageOf.ts";
+
+export { allocate, type AllocateOptions } from "./allocation/allocate.ts";

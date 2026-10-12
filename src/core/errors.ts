@@ -4,6 +4,7 @@ export type DecyErrorCode =
   | "invalidScale"
   | "invalidRoundingMode"
   | "invalidStep"
+  | "invalidRatios"
   | "divisionByZero";
 
 /** Thrown for programmer errors. User input never throws, it returns a result. */
